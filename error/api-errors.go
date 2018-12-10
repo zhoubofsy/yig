@@ -69,6 +69,7 @@ const (
 	ErrMissingRequestBodyError
 	ErrNoSuchBucket
 	ErrNoSuchBucketPolicy
+	ErrNoSuchDomain
 	ErrNoSuchKey
 	ErrNoSuchUpload
 	ErrNoSuchVersion
@@ -300,6 +301,11 @@ var ErrorCodeResponse = map[ApiErrorCode]ApiErrorStruct{
 	ErrNoSuchBucketPolicy: {
 		AwsErrorCode:   "NoSuchBucketPolicy",
 		Description:    "The specified bucket does not have a bucket policy.",
+		HttpStatusCode: http.StatusNotFound,
+	},
+	ErrNoSuchDomain: {
+		AwsErrorCode:   "NoSuchDomain",
+		Description:    "The specified domain does not exist",
 		HttpStatusCode: http.StatusNotFound,
 	},
 	ErrNoSuchKey: {

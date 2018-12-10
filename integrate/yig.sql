@@ -232,3 +232,18 @@ CREATE TABLE `users` (
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
 -- Dump completed on 2018-03-20 18:26:36
+
+--
+-- Table structure for table `cd`
+--
+
+DROP TABLE IF EXISTS `cd`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `cd` (
+  `domain` varchar(255) DEFAULT NULL,
+  `bucketname` varchar(255) DEFAULT NULL,
+   PRIMARY KEY (`domain`),
+   INDEX (bucketname(255))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+/*!40101 SET character_set_client = @saved_cs_client */;
