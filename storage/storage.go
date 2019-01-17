@@ -65,7 +65,7 @@ func New(logger *log.Logger, metaCacheType int, enableDataCache bool, CephConfig
 	}
 
 	for _, conf := range cephConfs {
-		c := NewCephStorage(conf, logger)
+		c := NewCephStorage(conf, logger.Logger)
 		if c != nil {
 			yig.DataStorage[c.Name] = c
 		}

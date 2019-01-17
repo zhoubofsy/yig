@@ -8,10 +8,9 @@ import (
 	"sync"
 
 	"github.com/journeymidnight/radoshttpd/rados"
-	"github.com/journeymidnight/yig/helper"
-	"github.com/journeymidnight/yig/log"
 	"time"
 	"fmt"
+	"log"
 )
 
 const (
@@ -40,7 +39,7 @@ type CephStorage struct {
 
 func NewCephStorage(configFile string, logger *log.Logger) *CephStorage {
 
-	logger.Printf(5, "Loading Ceph file %s\n", configFile)
+	logger.Printf("Loading Ceph file %s\n", configFile)
 
 	Rados, err := rados.NewConn("admin")
 	Rados.SetConfigOption("rados_mon_op_timeout", MON_TIMEOUT)
@@ -48,19 +47,19 @@ func NewCephStorage(configFile string, logger *log.Logger) *CephStorage {
 
 	err = Rados.ReadConfigFile(configFile)
 	if err != nil {
-		helper.Logger.Printf(0, "Failed to open ceph.conf: %s\n", configFile)
+		logger.Printf("Failed to open ceph.conf: %s\n", configFile)
 		return nil
 	}
 
 	err = Rados.Connect()
 	if err != nil {
-		helper.Logger.Printf(0, "Failed to connect to remote cluster: %s\n", configFile)
+		logger.Printf("Failed to connect to remote cluster: %s\n", configFile)
 		return nil
 	}
 
 	name, err := Rados.GetFSID()
 	if err != nil {
-		helper.Logger.Printf(0, "Failed to get FSID: %s\n", configFile)
+		logger.Printf("Failed to get FSID: %s\n", configFile)
 		Rados.Shutdown()
 		return nil
 	}
@@ -75,7 +74,7 @@ func NewCephStorage(configFile string, logger *log.Logger) *CephStorage {
 		CountMutex: new(sync.Mutex),
 	}
 
-	logger.Printf(5, "Ceph Cluster %s is ready, InstanceId is %d\n", name, id)
+	logger.Printf("Ceph Cluster %s is ready, InstanceId is %d\n", name, id)
 	return &cluster
 }
 
