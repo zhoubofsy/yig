@@ -107,7 +107,7 @@ func (h corsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		if origin != "" && InReservedOrigins(origin) {
 			w.Header().Set("Access-Control-Allow-Origin", "*")
 			w.Header().Set("Access-Control-Allow-Headers", "*")
-			w.Header().Set("Access-Control-Allow-Methods", "*")
+			w.Header().Set("Access-Control-Allow-Methods", "PUT, GET, POST, DELETE, OPTIONS, HEAD")
 			w.Header().Set("Access-Control-Expose-Headers", "*")
 			h.handler.ServeHTTP(w, r)
 			return
@@ -123,7 +123,7 @@ func (h corsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "OPTIONS" && InReservedOrigins(origin) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.Header().Set("Access-Control-Allow-Headers", "*")
-		w.Header().Set("Access-Control-Allow-Methods", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "PUT, GET, POST, DELETE, OPTIONS, HEAD")
 		w.Header().Set("Access-Control-Expose-Headers", "*")
 		WriteSuccessResponse(w, nil)
 		return
