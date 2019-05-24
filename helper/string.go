@@ -2,6 +2,13 @@ package helper
 
 import "strings"
 
+func HasBucketInDomain(host string, prefix string, domains string) (ok bool, bucket string) {
+	if strings.HasSuffix(host, prefix+domains) {
+		return true, strings.TrimSuffix(host, prefix+domains)
+	}
+	return false, ""
+}
+
 func StringInSlice(s string, ss []string) bool {
 	for _, x := range ss {
 		if s == x {
@@ -18,7 +25,7 @@ func CopiedBytes(source []byte) (destination []byte) {
 }
 
 func UnicodeIndex(str, substr string) int {
-	result := strings.Index(str,substr)
+	result := strings.Index(str, substr)
 	if result >= 0 {
 		prefix := []byte(str)[0:result]
 		rs := []rune(string(prefix))

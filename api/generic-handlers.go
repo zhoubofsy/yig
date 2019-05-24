@@ -20,10 +20,10 @@ import (
 	"net/http"
 	"strings"
 
+	mux "github.com/gorilla/mux"
 	. "github.com/journeymidnight/yig/error"
 	"github.com/journeymidnight/yig/helper"
 	"github.com/journeymidnight/yig/signature"
-	mux "github.com/gorilla/mux"
 )
 
 // HandlerFunc - useful to chain different middleware http.Handler
@@ -119,16 +119,14 @@ func (h corsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method == "OPTIONS" && InReservedOrigins(origin) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
-                w.Header().Set("Access-Control-Allow-Headers", "content-md5, content-type, x-amz-acl, x-amz-date, x-amz-user-agent, authorization, x-amz-content-sha256")
+		w.Header().Set("Access-Control-Allow-Headers", "content-md5, content-type, x-amz-acl, x-amz-date, x-amz-user-agent, authorization, x-amz-content-sha256")
 		w.Header().Set("Access-Control-Allow-Methods", "PUT, GET, DELETE, POST")
 		w.Header().Set("Access-Control-Expose-Headers", "x-amz-acl, Etag")
 		WriteSuccessResponse(w, nil)
 		return
 	}
 
-	urlSplit := strings.SplitN(r.URL.Path[1:], "/", 2) // "1:" to remove leading slash
-	bucketName := urlSplit[0]                          // assume bucketName is the first part of url path
-	helper.Debugln("bucket", bucketName)
+	bucketName, _ := GetBucketAndObjectInfoFromRequest(r)
 	bucket, err := h.objectLayer.GetBucket(bucketName)
 	if err != nil {
 		WriteErrorResponse(w, r, err)
@@ -171,26 +169,7 @@ func SetIgnoreResourcesHandler(h http.Handler, _ ObjectLayer) http.Handler {
 // Resource handler ServeHTTP() wrapper
 func (h resourceHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// Skip the first element which is usually '/' and split the rest.
-	var objectName string
-	var bucketName string
-	splits := strings.SplitN(r.URL.Path[1:], "/", 2)
-	v := strings.Split(r.Host, ":")
-	hostWithOutPort := v[0]
-	if strings.HasSuffix(hostWithOutPort, "."+helper.CONFIG.S3Domain) {
-		bucketName = strings.TrimSuffix(hostWithOutPort, "."+helper.CONFIG.S3Domain)
-		if len(splits) == 1 {
-			objectName = splits[0]
-		}
-	}else {
-		if len(splits) == 1 {
-			bucketName = splits[0]
-		}
-		if len(splits) == 2 {
-			bucketName = splits[0]
-			objectName = splits[1]
-		}
-	}
-
+	bucketName, objectName := GetBucketAndObjectInfoFromRequest(r)
 	helper.Logger.Println(5, "ServeHTTP", bucketName, objectName)
 	// If bucketName is present and not objectName check for bucket
 	// level resource queries.
@@ -276,4 +255,25 @@ var notimplementedBucketResourceNames = map[string]bool{
 var notimplementedObjectResourceNames = map[string]bool{
 	"torrent": true,
 	"policy":  true,
+}
+
+func GetBucketAndObjectInfoFromRequest(r *http.Request) (bucketName string, objectName string) {
+	splits := strings.SplitN(r.URL.Path[1:], "/", 2)
+	v := strings.Split(r.Host, ":")
+	hostWithOutPort := v[0]
+	ok, bucketName := helper.HasBucketInDomain(hostWithOutPort, ".", helper.CONFIG.S3Domain)
+	if ok {
+		if len(splits) == 1 {
+			objectName = splits[0]
+		}
+	} else {
+		if len(splits) == 1 {
+			bucketName = splits[0]
+		}
+		if len(splits) == 2 {
+			bucketName = splits[0]
+			objectName = splits[1]
+		}
+	}
+	return
 }
